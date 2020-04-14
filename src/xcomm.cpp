@@ -209,8 +209,11 @@ namespace xpyt
             py::object comm_manager = kernel_module.attr("_Mock");
             comm_manager.attr("register_target") = kernel_module.attr("register_target");
             kernel.attr("comm_manager") = comm_manager;
-
             py::object xeus_python = kernel_module.attr("_Mock");
+            py::module ipython_core = py::module::import("IPython.core");
+            if(!ipython_core.is_none())
+                xeus_python = ipython_core.attr("interactiveshell").attr("InteractiveShell").attr("instance")();
+
             xeus_python.attr("register_post_execute") = kernel_module.attr("register_post_execute");
             xeus_python.attr("enable_gui") = kernel_module.attr("enable_gui");
             xeus_python.attr("showtraceback") = kernel_module.attr("showtraceback");

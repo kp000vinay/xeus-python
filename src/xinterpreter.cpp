@@ -90,7 +90,7 @@ namespace xpyt
     {
         py::gil_scoped_acquire acquire;
         nl::json kernel_res;
-
+        std::string transformed_code = code;
         if (code.size() >= 2 && code[0] == '?')
         {
             std::string result = formatted_docstring(code);
@@ -119,12 +119,22 @@ namespace xpyt
 
         try
         {
+            py::module ipython = py::module::import("IPython");
+            if (py::hasattr(ipython, "get_ipython"))
+            {
+                py::object ipython_instance = ipython.attr("get_ipython")();
+                if(py::hasattr(ipython_instance, "transform_cell"))
+                {
+                    py::object transform_py_code = ipython_instance.attr("transform_cell")(code);
+                    transformed_code = transform_py_code.cast<std::string>();
+                }
+            }
             // Import modules
             py::module ast = py::module::import("ast");
             py::module builtins = py::module::import(XPYT_BUILTINS);
 
             // Parse code to AST
-            py::object code_ast = ast.attr("parse")(code, "<string>", "exec");
+            py::object code_ast = ast.attr("parse")(transformed_code, "<string>", "exec");
             py::list expressions = code_ast.attr("body");
 
             std::string filename = get_cell_tmp_file(code);

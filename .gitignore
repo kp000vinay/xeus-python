@@ -30,6 +30,10 @@
 # Vim tmp files
 *.swp
 
+#tags
+tags
+tags.lock
+
 # Test build artefacts
 test/CMakeCache.txt
 test/Makefile
